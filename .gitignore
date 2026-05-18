@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# Database (don't push local data)
+*.db
+*.sqlite3
+
+# Uploaded user files
+uploads/
+stego_*.jpeg
+stego_*.png
+extracted_*.pdf
+encrypted_*.bin
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Temporary fix script
+fix_db.py
+
+# Misc files that are not part of the project
+127.0.0.1_5000_.png/
+Professional_Practices_Detailed_Notes.pdf/
+Professional_Practices_Detailed_Notes_1.pdf/
+Saad_Hierarchical-Clustering.pptx/
+Verification/

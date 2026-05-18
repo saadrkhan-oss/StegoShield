@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title">Threat Intelligence Overview</h2>
+    <div class="date-filter">
+        <i class="fa-solid fa-calendar-days"></i> Last 7 Days <i class="fa-solid fa-chevron-down ms-2"></i>
+    </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary-glow"><i class="fa-solid fa-server"></i></div>
+            <div class="stat-details">
+                <p class="stat-label">Total Scans</p>
+                <h3 class="stat-value" id="valTotalScans">-</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-danger-glow"><i class="fa-solid fa-virus"></i></div>
+            <div class="stat-details">
+                <p class="stat-label">Malware Detected</p>
+                <h3 class="stat-value text-danger" id="valMalware">-</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-success-glow"><i class="fa-solid fa-shield-check"></i></div>
+            <div class="stat-details">
+                <p class="stat-label">Safe Files</p>
+                <h3 class="stat-value text-success" id="valSafe">-</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning-glow"><i class="fa-solid fa-gauge-high"></i></div>
+            <div class="stat-details">
+                <p class="stat-label">Avg Threat Score</p>
+                <h3 class="stat-value text-warning" id="valAvgScore">-</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-card h-100">
+            <h5 class="card-title">Risk Distribution</h5>
+            <div class="chart-container">
+                <canvas id="riskChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="dashboard-card h-100">
+            <h5 class="card-title">Operations Activity</h5>
+            <div class="chart-container">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Scans Table -->
+<div class="dashboard-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Recent Security Events</h5>
+        <a href="/history" class="btn btn-sm btn-outline-cyan">View All Logs</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table cyber-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Filename</th>
+                    <th>Operation</th>
+                    <th>Threat Score</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="recentTableBody">
+                <tr><td colspan="5" class="text-center py-4">Loading data...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('/api/stats');
+        const data = await response.json();
+        
+        // Update Stats
+        document.getElementById('valTotalScans').innerText = data.total_scans;
+        document.getElementById('valMalware').innerText = data.malware_detected;
+        document.getElementById('valSafe').innerText = data.safe_files;
+        document.getElementById('valAvgScore').innerText = data.avg_score + '/100';
+
+        // Set Chart.js Defaults for Dark Theme
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(99, 102, 241, 0.1)';
+
+        // Risk Chart (Doughnut)
+        const riskCtx = document.getElementById('riskChart').getContext('2d');
+        const riskLabels = Object.keys(data.risk_distribution);
+        const riskData = Object.values(data.risk_distribution);
+        
+        // Map colors based on label
+        const bgColors = riskLabels.map(label => {
+            if(label === 'Safe') return '#10b981';
+            if(label === 'Suspicious') return '#f59e0b';
+            if(label === 'Dangerous') return '#ef4444';
+            if(label === 'Critical') return '#991b1b';
+            return '#6366f1';
+        });
+
+        new Chart(riskCtx, {
+            type: 'doughnut',
+            data: {
+                labels: riskLabels,
+                datasets: [{
+                    data: riskData,
+                    backgroundColor: bgColors,
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Activity Chart (Bar)
+        const actCtx = document.getElementById('activityChart').getContext('2d');
+        const opLabels = Object.keys(data.operation_distribution);
+        const opData = Object.values(data.operation_distribution);
+        
+        new Chart(actCtx, {
+            type: 'bar',
+            data: {
+                labels: opLabels,
+                datasets: [{
+                    label: 'Operations',
+                    data: opData,
+                    backgroundColor: 'rgba(34, 211, 238, 0.7)',
+                    borderColor: '#22d3ee',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Populate Table
+        const tbody = document.getElementById('recentTableBody');
+        tbody.innerHTML = '';
+        if(data.recent_activity.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-cyan">No recent security events found.</td></tr>';
+        } else {
+            data.recent_activity.forEach(row => {
+                let badgeClass = 'bg-success';
+                if(row.risk_level === 'Suspicious') badgeClass = 'bg-warning text-dark';
+                if(row.risk_level === 'Dangerous') badgeClass = 'bg-danger';
+                if(row.risk_level === 'Critical') badgeClass = 'bg-dark border border-danger text-danger';
+
+                const date = new Date(row.timestamp).toLocaleString();
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="color: #22d3ee;"><small>${date}</small></td>
+                    <td class="text-light"><i class="fa-solid fa-file-code me-2 text-cyan"></i> ${row.filename}</td>
+                    <td><span class="op-badge">${row.operation_type}</span></td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.05);">
+                                <div class="progress-bar ${badgeClass}" style="width: ${row.threat_score}%"></div>
+                            </div>
+                            <span class="score-text text-light">${row.threat_score}</span>
+                        </div>
+                    </td>
+                    <td><span class="badge ${badgeClass} rounded-pill px-3">${row.risk_level}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+    } catch (err) {
+        console.error('Error loading dashboard stats:', err);
+        const tbody = document.getElementById('recentTableBody');
+        if(tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Failed to connect to security engine.</td></tr>';
+        
+        // Set placeholders to error
+        ['valTotalScans', 'valMalware', 'valSafe', 'valAvgScore'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.innerText = 'ERR';
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+# =============================================
+# StegoShield - Python Dependencies
+# =============================================
+
+# Core Framework
+Flask==3.0.0
+Flask-Login==0.6.3
+Flask-SQLAlchemy==3.1.1
+Werkzeug==3.0.1
+
+# Database
+SQLAlchemy==2.0.23
+
+# Cryptography & Steganography
+cryptography==41.0.7
+Pillow==10.2.0
+
+# Forensic Analysis
+opencv-python-headless==4.8.1.78
+numpy==1.26.3
+filetype==1.2.0
+
+# YARA Malware Detection
+yara-python==4.3.1
+
+# File Type Detection (cross-platform)
+python-magic-bin==0.4.14; sys_platform == "win32"
+python-magic==0.4.27; sys_platform != "win32"
+
+# AI / Machine Learning
+tensorflow==2.15.0
+
+# Production Server
+gunicorn==21.2.0
+
+# Environment Variables
+python-dotenv==1.0.0

@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title">Scan History</h2>
+    <div class="search-box">
+        <i class="fa-solid fa-search text-cyan position-absolute" style="left: 12px; top: 10px;"></i>
+        <input type="text" id="searchInput" class="form-control bg-dark border-secondary text-light ps-4"
+            placeholder="Filter logs...">
+    </div>
+</div>
+
+<div class="dashboard-card">
+    <div class="table-responsive">
+        <table class="table cyber-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>File</th>
+                    <th>Operation</th>
+                    <th>Threat Score</th>
+                    <th>Verdict</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="historyTableBody">
+                <tr>
+                    <td colspan="6" class="text-center py-4">Loading history...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- JSON Modal -->
+<div class="modal fade" id="jsonModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark border-secondary text-light">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="modalTitle">Scan Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="jsonContent" class="bg-black p-3 rounded"
+                    style="color: #22d3ee; max-height: 500px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let scanData = [];
+    const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const tbody = document.getElementById('historyTableBody');
+        try {
+            const response = await fetch('/api/history');
+            if(!response.ok) throw new Error('API unreachable');
+            scanData = await response.json();
+            renderTable(scanData);
+        } catch (err) {
+            console.error('Error loading history:', err);
+            if(tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Failed to retrieve security logs.</td></tr>';
+        }
+    });
+
+    function renderTable(data) {
+        const tbody = document.getElementById('historyTableBody');
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-cyan">No scan history available.</td></tr>';
+            return;
+        }
+
+        data.forEach(row => {
+            let badgeClass = 'bg-success';
+            if (row.risk_level === 'Suspicious') badgeClass = 'bg-warning text-dark';
+            if (row.risk_level === 'Dangerous') badgeClass = 'bg-danger';
+            if (row.risk_level === 'Critical') badgeClass = 'bg-dark border border-danger text-danger';
+
+            const date = new Date(row.timestamp).toLocaleString();
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+            <td class="text-cyan"><small>${date}</small></td>
+            <td class="text-light"><i class="fa-solid fa-file-shield me-2 text-primary"></i> ${row.filename}</td>
+            <td><span class="op-badge">${row.operation_type}</span></td>
+            <td>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.05); min-width: 100px;">
+                        <div class="progress-bar ${badgeClass}" style="width: ${row.threat_score}%"></div>
+                    </div>
+                    <span class="score-text text-light">${row.threat_score}</span>
+                </div>
+            </td>
+            <td><span class="badge ${badgeClass} rounded-pill px-3">${row.risk_level}</span></td>
+            <td>
+                ${isAdmin ? `
+                <button class="btn btn-sm btn-cyan text-dark fw-bold view-json-btn" data-id="${row.id}">
+                    <i class="fa-solid fa-code"></i> Details
+                </button>
+                ` : `<span class="text-info small"><i class="fa-solid fa-lock"></i> Restricted</span>`}
+            </td>
+        `;
+            tbody.appendChild(tr);
+        });
+
+        document.querySelectorAll('.view-json-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.currentTarget.getAttribute('data-id');
+                const originalBtnText = e.currentTarget.innerHTML;
+                e.currentTarget.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                e.currentTarget.disabled = true;
+
+                try {
+                    const response = await fetch(`/api/report/${id}`);
+                    const fullRecord = await response.json();
+
+                    document.getElementById('modalTitle').innerText = `Forensic Breakdown: ${fullRecord.filename}`;
+                    document.getElementById('jsonContent').innerText = JSON.stringify(fullRecord.report_json, null, 2);
+                    new bootstrap.Modal(document.getElementById('jsonModal')).show();
+                } catch (err) {
+                    console.error('Error fetching report:', err);
+                    alert('Failed to load forensic data.');
+                } finally {
+                    e.currentTarget.innerHTML = originalBtnText;
+                    e.currentTarget.disabled = false;
+                }
+            });
+        });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const filtered = scanData.filter(r =>
+            r.filename.toLowerCase().includes(term) ||
+            r.operation_type.toLowerCase().includes(term) ||
+            r.risk_level.toLowerCase().includes(term)
+        );
+        renderTable(filtered);
+    });
+</script>
+{% endblock %}

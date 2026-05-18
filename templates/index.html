@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StegoShield - Advanced Secure Steganography System with AES-256-GCM encryption and AI-powered threat detection.">
+    <title>StegoShield | Secure Steganography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="app-container">
+    <!-- HEADER -->
+    <header class="app-header">
+        <div class="logo-row">
+            <div class="logo-icon">🛡️</div>
+            <h1 class="app-title">StegoShield</h1>
+        </div>
+        <p class="app-subtitle">Advanced Secure Steganography System</p>
+        <span class="security-badge">🔒 AES-256-GCM Encrypted</span>
+    </header>
+
+    <!-- MAIN CARD -->
+    <main class="main-card">
+        <!-- TABS -->
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="encrypt" onclick="switchTab('encrypt', event)">
+                <span class="tab-icon">🔐</span> Encrypt
+            </button>
+            <button class="tab-btn" data-tab="decrypt" onclick="switchTab('decrypt', event)">
+                <span class="tab-icon">🔓</span> Decrypt
+            </button>
+            <button class="tab-btn" data-tab="scan" onclick="switchTab('scan', event)">
+                <span class="tab-icon">🔍</span> Scan
+            </button>
+        </div>
+
+        <!-- ENCRYPT SECTION -->
+        <section id="encryptSection" class="form-section active">
+            <form id="encryptForm" enctype="multipart/form-data">
+                <div class="input-group">
+                    <label>Cover Image</label>
+                    <div class="drop-zone" id="coverDrop">
+                        <span class="dz-icon">🖼️</span>
+                        <div class="dz-text"><strong>Click or drag</strong> an image here (PNG/JPG)</div>
+                        <input type="file" name="cover" accept="image/*" required>
+                        <div class="file-info" id="coverInfo">✓ <span></span></div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Secret File</label>
+                    <div class="drop-zone" id="secretDrop">
+                        <span class="dz-icon">📄</span>
+                        <div class="dz-text"><strong>Click or drag</strong> any file to hide</div>
+                        <input type="file" name="secret" required>
+                        <div class="file-info" id="secretInfo">✓ <span></span></div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Encryption Password</label>
+                    <div class="pwd-wrapper">
+                        <input type="password" name="password" id="encryptPassword" required placeholder="Enter a strong password">
+                        <button type="button" class="pwd-toggle" onclick="togglePwd('encryptPassword', this)">👁️</button>
+                    </div>
+                    <div class="pwd-strength" id="encStrength">
+                        <div class="strength-bar"><div class="strength-fill" id="encStrengthFill"></div></div>
+                        <span class="strength-label" id="encStrengthLabel"></span>
+                    </div>
+                    <div class="pwd-rules" id="encRules">
+                        <span data-rule="len">✕ 8-20 characters</span>
+                        <span data-rule="letter">✕ Has a letter</span>
+                        <span data-rule="digit">✕ Has a number</span>
+                        <span data-rule="special">✕ Has @$!%*#?&</span>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" id="encryptBtn">
+                    <span class="loader"></span>
+                    <span>🔐 Encrypt & Embed</span>
+                </button>
+            </form>
+            <div id="encryptResult" class="result-box"></div>
+        </section>
+
+        <!-- DECRYPT SECTION -->
+        <section id="decryptSection" class="form-section">
+            <form id="decryptForm" enctype="multipart/form-data">
+                <div class="input-group">
+                    <label>Stego Image</label>
+                    <div class="drop-zone" id="stegoDrop">
+                        <span class="dz-icon">🖼️</span>
+                        <div class="dz-text"><strong>Click or drag</strong> a stego image (PNG)</div>
+                        <input type="file" name="stego" required>
+                        <div class="file-info" id="stegoInfo">✓ <span></span></div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Decryption Password</label>
+                    <div class="pwd-wrapper">
+                        <input type="password" name="password" id="decryptPassword" required placeholder="Enter password to unlock">
+                        <button type="button" class="pwd-toggle" onclick="togglePwd('decryptPassword', this)">👁️</button>
+                    </div>
+                    <span class="hint">Password must be 8-20 characters long, and contain at least 1 letter, 1 number, and 1 special char (@$!%*#?&).</span>
+                </div>
+                <button type="submit" class="btn-primary" id="decryptBtn">
+                    <span class="loader"></span>
+                    <span>🔓 Decrypt & Scan</span>
+                </button>
+            </form>
+            <div id="decryptResult" class="result-box"></div>
+        </section>
+
+        <!-- SCAN SECTION -->
+        <section id="scanSection" class="form-section">
+            <form id="scanForm" enctype="multipart/form-data">
+                <div class="input-group">
+                    <label>Image for Threat Analysis</label>
+                    <div class="drop-zone" id="scanDrop">
+                        <span class="dz-icon">🔍</span>
+                        <div class="dz-text"><strong>Click or drag</strong> an image (PNG/JPG/BMP)</div>
+                        <input type="file" name="file" accept="image/*" required>
+                        <div class="file-info" id="scanFileInfo">✓ <span></span></div>
+                    </div>
+                    <span class="hint">Analyze image through the advanced AI and forensic threat detection pipeline.</span>
+                </div>
+                <button type="submit" class="btn-primary" id="scanBtn">
+                    <span class="loader"></span>
+                    <span>🔍 Analyze Image</span>
+                </button>
+            </form>
+            <div id="scanResult" class="result-box"></div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        StegoShield v2.0 — Powered by AES-256-GCM &amp; AI Threat Detection
+    </footer>
+</div>
+
+<script>
+// === TAB SWITCHING ===
+function switchTab(tab, e) {
+    const btn = e.currentTarget;
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(tab === 'encrypt' ? 'encryptSection' : tab === 'decrypt' ? 'decryptSection' : 'scanSection').classList.add('active');
+}
+
+// === DRAG & DROP ===
+document.querySelectorAll('.drop-zone').forEach(zone => {
+    const input = zone.querySelector('input[type="file"]');
+    const infoEl = zone.querySelector('.file-info');
+
+    ['dragenter','dragover'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.classList.add('drag-over'); }));
+    ['dragleave','drop'].forEach(e => zone.addEventListener(e, () => zone.classList.remove('drag-over')));
+    zone.addEventListener('drop', ev => {
+        ev.preventDefault();
+        if (ev.dataTransfer.files.length) { input.files = ev.dataTransfer.files; showFileInfo(input, infoEl); }
+    });
+    input.addEventListener('change', () => showFileInfo(input, infoEl));
+});
+
+function showFileInfo(input, infoEl) {
+    if (input.files.length) {
+        const f = input.files[0];
+        const size = f.size < 1024*1024 ? (f.size/1024).toFixed(1)+' KB' : (f.size/1024/1024).toFixed(1)+' MB';
+        infoEl.querySelector('span').textContent = f.name + ' (' + size + ')';
+        infoEl.classList.add('show');
+    }
+}
+
+// === PASSWORD TOGGLE ===
+function togglePwd(id, btn) {
+    const inp = document.getElementById(id);
+    const isHidden = inp.type === 'password';
+    inp.type = isHidden ? 'text' : 'password';
+    btn.textContent = isHidden ? '🙈' : '👁️';
+}
+
+// === PASSWORD STRENGTH ===
+document.getElementById('encryptPassword').addEventListener('input', function() {
+    const pwd = this.value;
+    const fill = document.getElementById('encStrengthFill');
+    const label = document.getElementById('encStrengthLabel');
+    const rules = document.getElementById('encRules');
+
+    const hasLen = pwd.length >= 8 && pwd.length <= 20;
+    const hasLetter = /[A-Za-z]/.test(pwd);
+    const hasDigit = /\d/.test(pwd);
+    const hasSpecial = /[@$!%*#?&]/.test(pwd);
+
+    rules.querySelector('[data-rule="len"]').className = hasLen ? 'met' : '';
+    rules.querySelector('[data-rule="len"]').textContent = (hasLen ? '✓' : '✕') + ' 8-20 characters';
+    rules.querySelector('[data-rule="letter"]').className = hasLetter ? 'met' : '';
+    rules.querySelector('[data-rule="letter"]').textContent = (hasLetter ? '✓' : '✕') + ' Has a letter';
+    rules.querySelector('[data-rule="digit"]').className = hasDigit ? 'met' : '';
+    rules.querySelector('[data-rule="digit"]').textContent = (hasDigit ? '✓' : '✕') + ' Has a number';
+    rules.querySelector('[data-rule="special"]').className = hasSpecial ? 'met' : '';
+    rules.querySelector('[data-rule="special"]').textContent = (hasSpecial ? '✓' : '✕') + ' Has @$!%*#?&';
+
+    let score = [hasLen, hasLetter, hasDigit, hasSpecial].filter(Boolean).length;
+    const colors = ['var(--red)','var(--orange)','var(--yellow)','var(--green)'];
+    const labels = ['Weak','Fair','Good','Strong'];
+    fill.style.width = (score * 25) + '%';
+    fill.style.background = score > 0 ? colors[score-1] : 'transparent';
+    label.textContent = pwd.length > 0 ? labels[Math.max(0, score-1)] : '';
+    label.style.color = score > 0 ? colors[score-1] : 'var(--text-muted)';
+});
+
+// === PASSWORD VALIDATION ===
+const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,20}$/;
+
+function validatePwd(id, resultDivId) {
+    const pwd = document.getElementById(id).value;
+    if (!pwdRegex.test(pwd)) {
+        const rd = document.getElementById(resultDivId);
+        rd.style.display = 'block';
+        rd.innerHTML = '<p class="error-text">❌ Password must be 8-20 characters with at least 1 letter, 1 number, and 1 special character (@$!%*#?&).</p>';
+        return false;
+    }
+    return true;
+}
+
+// === HELPER: RENDER SCAN REPORT ===
+function generateReportHTML(report) {
+    let scoreColor = report.threat_score <= 20 ? 'var(--green)' : (report.threat_score <= 40 ? 'var(--yellow)' : (report.threat_score <= 70 ? 'var(--orange)' : 'var(--red)'));
+    let html = `
+        <div class="report-card">
+            <h4>📊 Threat Analysis Report</h4>
+            <div class="score-box">
+                <div class="score-header">
+                    <span class="label">Threat Score</span>
+                    <span class="value" style="color:${scoreColor}">${report.threat_score}/100</span>
+                </div>
+                <div class="score-bar"><div class="score-bar-fill" style="width:${report.threat_score}%;background:${scoreColor}"></div></div>
+                <div class="score-risk" style="color:${scoreColor}">${report.risk_level}</div>
+            </div>
+            <div class="report-layers">`;
+
+    if (report.layers.validation && !report.layers.validation.is_valid)
+        html += `<div><span style="color:var(--red)">❌ Validation:</span> ${report.layers.validation.errors.join(', ')}</div>`;
+    if (report.layers.metadata && report.layers.metadata.suspicious_tags && report.layers.metadata.suspicious_tags.length > 0)
+        html += `<div><span style="color:var(--yellow)">⚠️ Metadata:</span> Suspicious EXIF data detected.</div>`;
+    if (report.layers.steganalysis && (report.layers.steganalysis.histogram_anomaly || report.layers.steganalysis.lsb_inconsistency))
+        html += `<div><span style="color:var(--yellow)">⚠️ Steganalysis:</span> Statistical anomalies found (possible hidden data).</div>`;
+    if (report.layers.extraction && report.layers.extraction.payload_extracted)
+        html += `<div><span style="color:var(--orange)">📦 Extraction:</span> Hidden payloads detected by Binwalk/zsteg.</div>`;
+    if (report.layers.yara && report.layers.yara.yara_hits && report.layers.yara.yara_hits.length > 0)
+        html += `<div><span style="color:var(--red)">🚨 YARA:</span> Matched: ${report.layers.yara.yara_hits.join(', ')}</div>`;
+    if (report.layers.clamav && report.layers.clamav.status === 'INFECTED')
+        html += `<div><span style="color:var(--red)">🚨 ClamAV:</span> Infection detected.</div>`;
+    if (report.layers.ai && report.layers.ai.prediction)
+        html += `<div><span>🤖 AI Prediction:</span> ${report.layers.ai.prediction} (${(report.layers.ai.confidence * 100).toFixed(1)}%)</div>`;
+    if (report.layers.entropy && report.layers.entropy.entropy)
+        html += `<div><span>📊 Entropy:</span> ${report.layers.entropy.entropy.toFixed(4)}</div>`;
+
+    html += `</div></div>`;
+    return html;
+}
+
+// === ENCRYPTION REPORT CARD ===
+function generateEncReportHTML(res) {
+    const now = new Date().toLocaleString();
+    return `
+        <div class="enc-report">
+            <div class="enc-report-item"><span class="label">Algorithm</span><span class="value">AES-256-GCM</span></div>
+            <div class="enc-report-item"><span class="label">Key Derivation</span><span class="value">PBKDF2-HMAC-SHA256</span></div>
+            <div class="enc-report-item"><span class="label">Iterations</span><span class="value">100,000</span></div>
+            <div class="enc-report-item"><span class="label">Stego File</span><span class="value">${res.stego_filename}</span></div>
+            ${res.encrypted_filename ? `<div class="enc-report-item"><span class="label">Encrypted File</span><span class="value">${res.encrypted_filename}</span></div>` : ''}
+            <div class="enc-report-item"><span class="label">Timestamp</span><span class="value">${now}</span></div>
+        </div>`;
+}
+
+// === BUTTON STATE HELPERS ===
+function btnLoading(btn, text) {
+    btn.disabled = true;
+    btn.querySelector('.loader').style.display = 'inline-block';
+    btn.querySelector('span:last-child').innerText = text;
+}
+function btnReset(btn, text) {
+    btn.disabled = false;
+    btn.querySelector('.loader').style.display = 'none';
+    btn.querySelector('span:last-child').innerText = text;
+}
+
+// === ENCRYPTION HANDLER ===
+document.getElementById("encryptForm").onsubmit = async function (e) {
+    e.preventDefault();
+    if (!validatePwd('encryptPassword', 'encryptResult')) return;
+
+    let formData = new FormData(this);
+    let btn = document.getElementById("encryptBtn");
+    let resultDiv = document.getElementById("encryptResult");
+
+    resultDiv.style.display = 'none';
+    btnLoading(btn, 'Processing...');
+
+    try {
+        let r = await fetch("/encrypt", { method: "POST", body: formData });
+        let res = await r.json();
+        resultDiv.style.display = 'block';
+
+        if (!r.ok) {
+            resultDiv.innerHTML = `<p class="error-text">❌ ${res.error || "Unknown error"}</p>`;
+        } else {
+            resultDiv.innerHTML = `
+                <h3 class="success-text">✅ Encryption Successful</h3>
+                <p style="color:var(--text-secondary);margin:8px 0">${res.message}</p>
+                ${generateEncReportHTML(res)}
+                ${res.secret_report ? generateReportHTML(res.secret_report) : ''}
+                <div class="download-group">
+                    <a href="/download/${res.stego_filename}" class="btn-download" download>📥 Download Stego Image</a>
+                    ${res.encrypted_filename ? `<a href="/download/${res.encrypted_filename}" class="btn-download" download>📥 Raw Encrypted Data</a>` : ''}
+                </div>`;
+        }
+    } catch (err) {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `<p class="error-text">⚠️ Network Error: ${err}</p>`;
+    } finally {
+        btnReset(btn, '🔐 Encrypt & Embed');
+    }
+};
+
+// === DECRYPTION HANDLER ===
+document.getElementById("decryptForm").onsubmit = async function (e) {
+    e.preventDefault();
+    if (!validatePwd('decryptPassword', 'decryptResult')) return;
+
+    let formData = new FormData(this);
+    let btn = document.getElementById("decryptBtn");
+    let resultDiv = document.getElementById("decryptResult");
+
+    resultDiv.style.display = 'none';
+    btnLoading(btn, 'Decrypting...');
+
+    try {
+        let r = await fetch("/decrypt", { method: "POST", body: formData });
+        let res = await r.json();
+        resultDiv.style.display = 'block';
+
+        if (!r.ok) {
+            resultDiv.innerHTML = `<p class="error-text">❌ ${res.error || "Unknown error"}</p>`;
+            return;
+        }
+
+        let statusClass = res.safe ? "success-text" : "error-text";
+        let icon = res.safe ? "✅" : "🚨";
+        let title = res.safe ? "File Safe" : "Security Alert";
+        if (!res.safe && res.extracted_filename) { statusClass = "warning-text"; title = "Suspicious File"; icon = "⚠️"; }
+
+        let html = `
+            <h3 class="${statusClass}">${icon} ${title}</h3>
+            <p style="color:var(--text-secondary);margin:8px 0">${res.message}</p>
+            <div class="enc-report">
+                <div class="enc-report-item"><span class="label">Algorithm</span><span class="value">AES-256-GCM</span></div>
+                <div class="enc-report-item"><span class="label">Decrypted At</span><span class="value">${new Date().toLocaleString()}</span></div>
+                ${res.extracted_filename ? `<div class="enc-report-item"><span class="label">Extracted File</span><span class="value">${res.extracted_filename}</span></div>` : ''}
+            </div>`;
+
+        if (res.scan_report) html += generateReportHTML(res.scan_report);
+        if (res.extracted_filename) html += `<div class="download-group"><a href="/download/${res.extracted_filename}" class="btn-download" download>📥 Download Extracted File</a></div>`;
+
+        resultDiv.innerHTML = html;
+    } catch (err) {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `<p class="error-text">⚠️ Network Error: ${err}</p>`;
+    } finally {
+        btnReset(btn, '🔓 Decrypt & Scan');
+    }
+};
+
+// === SCAN HANDLER ===
+document.getElementById("scanForm").onsubmit = async function (e) {
+    e.preventDefault();
+
+    let resultDiv = document.getElementById("scanResult");
+    let formData = new FormData(this);
+    let btn = document.getElementById("scanBtn");
+
+    resultDiv.style.display = 'none';
+    btnLoading(btn, 'Analyzing...');
+
+    try {
+        let r = await fetch("/scan", { method: "POST", body: formData });
+        let res = await r.json();
+        resultDiv.style.display = 'block';
+
+        if (!r.ok) {
+            resultDiv.innerHTML = `<p class="error-text">❌ ${res.error || "Unknown error"}</p>`;
+            return;
+        }
+
+        let isSafe = res.risk_level === "Safe";
+        let statusClass = isSafe ? "success-text" : "error-text";
+        let icon = isSafe ? "✅" : "🚨";
+        let title = isSafe ? "Clean Image" : "Threat Detected";
+        if (res.risk_level === "Suspicious") { statusClass = "warning-text"; title = "Suspicious Image"; icon = "⚠️"; }
+
+        resultDiv.innerHTML = `<h3 class="${statusClass}">${icon} ${title}</h3>` + generateReportHTML(res);
+    } catch (err) {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `<p class="error-text">⚠️ Network Error: ${err}</p>`;
+    } finally {
+        btnReset(btn, '🔍 Analyze Image');
+    }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="page-title">StegoShield Hub</h2>
+            <span class="badge bg-dark border border-secondary p-2"><i
+                    class="fa-solid fa-lock text-success me-2"></i>AES-256-GCM Secure</span>
+        </div>
+
+        <div class="main-card">
+            <!-- TABS -->
+            <div class="tab-bar">
+                <button class="tab-btn active" data-tab="encrypt" onclick="switchTab('encrypt', event)">
+                    <span class="tab-icon"><i class="fa-solid fa-lock"></i></span> Encrypt
+                </button>
+                <button class="tab-btn" data-tab="decrypt" onclick="switchTab('decrypt', event)">
+                    <span class="tab-icon"><i class="fa-solid fa-unlock-keyhole"></i></span> Decrypt
+                </button>
+                <button class="tab-btn" data-tab="scan" onclick="switchTab('scan', event)">
+                    <span class="tab-icon"><i class="fa-solid fa-microscope"></i></span> Scan
+                </button>
+            </div>
+
+            <!-- ENCRYPT SECTION -->
+            <section id="encryptSection" class="form-section active">
+                <form id="encryptForm" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <label for="coverInput" class="form-label text-light small uppercase fw-bold">1. Select Cover
+                            Image</label>
+                        <div class="drop-zone" id="coverDrop">
+                            <span class="dz-icon text-cyan"><i class="fa-regular fa-image"></i></span>
+                            <div class="dz-text"><strong>Click or drag</strong> a PNG/JPG image to hide data inside
+                            </div>
+                            <input type="file" id="coverInput" name="cover" accept="image/*" required
+                                title="Choose a cover image">
+                            <div class="file-info" id="coverInfo">✓ <span></span></div>
+                        </div>
+                        <span class="hint d-block mt-1 fw-bold" style="font-size: 0.8rem; color: #22d3ee;"><i
+                                class="fa-solid fa-circle-info me-1"></i> This image will act as the carrier for your
+                            secret file.</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="secretInput" class="form-label text-light small uppercase fw-bold">2. Select Secret
+                            File</label>
+                        <div class="drop-zone" id="secretDrop">
+                            <span class="dz-icon text-success"><i class="fa-regular fa-file-code"></i></span>
+                            <div class="dz-text"><strong>Click or drag</strong> the file you want to hide</div>
+                            <input type="file" id="secretInput" name="secret" required title="Choose a secret file">
+                            <div class="file-info" id="secretInfo">✓ <span></span></div>
+                        </div>
+                        <span class="hint d-block mt-1 fw-bold" style="font-size: 0.8rem; color: #22d3ee;"><i
+                                class="fa-solid fa-circle-info me-1"></i> Any file format can be hidden securely.</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="encryptPassword" class="form-label text-light small uppercase fw-bold">3. Encryption
+                            Password</label>
+                        <div class="pwd-wrapper">
+                            <input type="password" name="password" id="encryptPassword" required
+                                placeholder="Create a unique encryption key" title="Enter a strong password">
+                            <button type="button" class="pwd-toggle" onclick="togglePwd('encryptPassword', this)"
+                                title="Toggle Visibility"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                        <div class="pwd-strength" id="encStrength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="encStrengthFill"></div>
+                            </div>
+                            <span class="strength-label" id="encStrengthLabel"></span>
+                        </div>
+                        <div class="pwd-rules" id="encRules">
+                            <span data-rule="len"><i class="fa-solid fa-xmark me-1"></i>8-20 chars</span>
+                            <span data-rule="letter"><i class="fa-solid fa-xmark me-1"></i>1 Letter</span>
+                            <span data-rule="digit"><i class="fa-solid fa-xmark me-1"></i>1 Number</span>
+                            <span data-rule="special"><i class="fa-solid fa-xmark me-1"></i>1 Special (@$!%*#?&)</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary-glow w-100" id="encryptBtn">
+                        <span class="loader"></span>
+                        <span><i class="fa-solid fa-lock me-2"></i> Execute Encryption & Embedding</span>
+                    </button>
+                </form>
+                <div id="encryptResult" class="result-box mt-4"></div>
+            </section>
+
+            <!-- DECRYPT SECTION -->
+            <section id="decryptSection" class="form-section">
+                <form id="decryptForm" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <label for="stegoInput" class="form-label text-light small uppercase fw-bold">1. Select Stego
+                            Image</label>
+                        <div class="drop-zone" id="stegoDrop">
+                            <span class="dz-icon text-warning"><i class="fa-regular fa-file-image"></i></span>
+                            <div class="dz-text"><strong>Click or drag</strong> the PNG image containing hidden data
+                            </div>
+                            <input type="file" id="stegoInput" name="stego" required title="Choose a stego image">
+                            <div class="file-info" id="stegoInfo">✓ <span></span></div>
+                        </div>
+                        <span class="hint d-block mt-1 fw-bold" style="font-size: 0.8rem; color: #22d3ee;"><i
+                                class="fa-solid fa-circle-info me-1"></i> The image must be in PNG format for
+                            extraction.</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="decryptPassword" class="form-label text-light small uppercase fw-bold">2. Decryption
+                            Password</label>
+                        <div class="pwd-wrapper">
+                            <input type="password" name="password" id="decryptPassword" required
+                                placeholder="Enter the secret key to unlock" title="Enter the decryption password">
+                            <button type="button" class="pwd-toggle" onclick="togglePwd('decryptPassword', this)"
+                                title="Toggle Visibility"><i class="fa-solid fa-eye"></i></button>
+                        </div>
+                        <span class="hint d-block mt-1 fw-bold" style="font-size: 0.8rem; color: #22d3ee;"><i
+                                class="fa-solid fa-circle-info me-1"></i> Password must match the one used during
+                            encryption.</span>
+                    </div>
+                    <button type="submit" class="btn-primary-glow w-100" id="decryptBtn">
+                        <span class="loader"></span>
+                        <span><i class="fa-solid fa-unlock-keyhole me-2"></i> Execute Decryption & Extraction</span>
+                    </button>
+                </form>
+                <div id="decryptResult" class="result-box mt-4"></div>
+            </section>
+
+            <!-- SCAN SECTION -->
+            <section id="scanSection" class="form-section">
+                <form id="scanForm" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <label for="scanInput" class="form-label text-light small uppercase fw-bold">1. Image for Threat
+                            Analysis</label>
+                        <div class="drop-zone" id="scanDrop">
+                            <span class="dz-icon text-danger"><i class="fa-solid fa-radar"></i></span>
+                            <div class="dz-text"><strong>Click or drag</strong> any image to scan for threats</div>
+                            <input type="file" id="scanInput" name="file" accept="image/*" required
+                                title="Choose an image to scan">
+                            <div class="file-info" id="scanFileInfo">✓ <span></span></div>
+                        </div>
+                        <span class="hint d-block mt-1 fw-bold" style="font-size: 0.8rem; color: #22d3ee;"><i
+                                class="fa-solid fa-circle-info me-1"></i> The system will run a 10-layer forensic
+                            analysis.</span>
+                    </div>
+                    <button type="submit" class="btn-primary-glow w-100" id="scanBtn">
+                        <span class="loader"></span>
+                        <span><i class="fa-solid fa-magnifying-glass-chart me-2"></i> Execute Forensic Scan</span>
+                    </button>
+                </form>
+                <div id="scanResult" class="result-box mt-4"></div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // === TAB SWITCHING ===
+    function switchTab(tab, e) {
+        const btn = e.currentTarget;
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(tab === 'encrypt' ? 'encryptSection' : tab === 'decrypt' ? 'decryptSection' : 'scanSection').classList.add('active');
+    }
+
+    // === DRAG & DROP ===
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        const input = zone.querySelector('input[type="file"]');
+        const infoEl = zone.querySelector('.file-info');
+
+        ['dragenter', 'dragover'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.classList.add('drag-over'); }));
+        ['dragleave', 'drop'].forEach(e => zone.addEventListener(e, () => zone.classList.remove('drag-over')));
+        zone.addEventListener('drop', ev => {
+            ev.preventDefault();
+            if (ev.dataTransfer.files.length) { input.files = ev.dataTransfer.files; showFileInfo(input, infoEl); }
+        });
+        input.addEventListener('change', () => showFileInfo(input, infoEl));
+    });
+
+    function showFileInfo(input, infoEl) {
+        if (input.files.length) {
+            const f = input.files[0];
+            const size = f.size < 1024 * 1024 ? (f.size / 1024).toFixed(1) + ' KB' : (f.size / 1024 / 1024).toFixed(1) + ' MB';
+            infoEl.querySelector('span').textContent = f.name + ' (' + size + ')';
+            infoEl.classList.add('show');
+        }
+    }
+
+    // === PASSWORD TOGGLE ===
+    function togglePwd(id, btn) {
+        const inp = document.getElementById(id);
+        const isHidden = inp.type === 'password';
+        inp.type = isHidden ? 'text' : 'password';
+        btn.innerHTML = isHidden ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+    }
+
+    // === PASSWORD STRENGTH ===
+    const encPwdInput = document.getElementById('encryptPassword');
+    if (encPwdInput) {
+        encPwdInput.addEventListener('input', function () {
+            const pwd = this.value;
+            const fill = document.getElementById('encStrengthFill');
+            const label = document.getElementById('encStrengthLabel');
+            const rules = document.getElementById('encRules');
+
+            const hasLen = pwd.length >= 8 && pwd.length <= 20;
+            const hasLetter = /[A-Za-z]/.test(pwd);
+            const hasDigit = /\d/.test(pwd);
+            const hasSpecial = /[@$!%*#?&]/.test(pwd);
+
+            const updateRule = (ruleName, isMet, text) => {
+                const el = rules.querySelector(`[data-rule="${ruleName}"]`);
+                el.className = isMet ? 'met' : '';
+                el.innerHTML = isMet ? `<i class="fa-solid fa-check me-1"></i>${text}` : `<i class="fa-solid fa-xmark me-1"></i>${text}`;
+            };
+
+            updateRule('len', hasLen, '8-20 chars');
+            updateRule('letter', hasLetter, '1 Letter');
+            updateRule('digit', hasDigit, '1 Number');
+            updateRule('special', hasSpecial, '1 Special (@$!%*#?&)');
+
+            let score = [hasLen, hasLetter, hasDigit, hasSpecial].filter(Boolean).length;
+            const colors = ['var(--red)', 'var(--orange)', 'var(--yellow)', 'var(--green)'];
+            const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+            fill.style.width = (score * 25) + '%';
+            fill.style.background = score > 0 ? colors[score - 1] : 'transparent';
+            label.textContent = pwd.length > 0 ? labels[Math.max(0, score - 1)] : '';
+            label.style.color = score > 0 ? colors[score - 1] : '#22d3ee';
+        });
+    }
+
+    // === PASSWORD VALIDATION ===
+    const pwdRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,20}$/;
+    const isAdmin = {{ 'true' if current_user.is_admin else 'false' }};
+
+    function validatePwd(id, resultDivId) {
+        const pwd = document.getElementById(id).value;
+        if (!pwdRegex.test(pwd)) {
+            const rd = document.getElementById(resultDivId);
+            rd.style.display = 'block';
+            rd.innerHTML = '<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Password must be 8-20 characters with at least 1 letter, 1 number, and 1 special character (@$!%*#?&).</div>';
+            return false;
+        }
+        return true;
+    }
+
+    // === HELPER: RENDER SCAN REPORT ===
+    function generateReportHTML(report) {
+        let scoreColor = report.threat_score <= 20 ? 'var(--green)' : (report.threat_score <= 40 ? 'var(--yellow)' : (report.threat_score <= 70 ? 'var(--orange)' : 'var(--red)'));
+        let html = `
+        <div class="report-card mt-3">
+            <h5 class="mb-3"><i class="fa-solid fa-chart-pie me-2 text-cyan"></i>Threat Analysis Report</h5>
+            <div class="score-box">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold">Threat Score</span>
+                    <span class="fs-4 fw-bolder" style="color:${scoreColor}">${report.threat_score}/100</span>
+                </div>
+                <div class="progress" style="height: 6px; background: rgba(255,255,255,0.05);">
+                    <div class="progress-bar" style="width:${report.threat_score}%; background:${scoreColor}"></div>
+                </div>
+                <div class="text-end mt-1 fw-bold" style="font-size: 0.8rem; color:${scoreColor}">${report.risk_level}</div>
+            </div>`;
+
+        if (isAdmin) {
+            html += `<div class="report-layers mt-3">`;
+            if (report.layers.validation && !report.layers.validation.is_valid)
+                html += `<div><span style="color:var(--red)"><i class="fa-solid fa-xmark me-2"></i>Validation:</span> ${report.layers.validation.errors.join(', ')}</div>`;
+            if (report.layers.metadata && report.layers.metadata.suspicious_tags && report.layers.metadata.suspicious_tags.length > 0)
+                html += `<div><span style="color:var(--yellow)"><i class="fa-solid fa-triangle-exclamation me-2"></i>Metadata:</span> Suspicious EXIF data detected.</div>`;
+            if (report.layers.steganalysis && (report.layers.steganalysis.histogram_anomaly || report.layers.steganalysis.lsb_inconsistency))
+                html += `<div><span style="color:var(--yellow)"><i class="fa-solid fa-triangle-exclamation me-2"></i>Steganalysis:</span> Statistical anomalies found.</div>`;
+            if (report.layers.extraction && report.layers.extraction.payload_extracted)
+                html += `<div><span style="color:var(--orange)"><i class="fa-solid fa-box-open me-2"></i>Extraction:</span> Hidden payloads detected.</div>`;
+            if (report.layers.yara && report.layers.yara.yara_hits && report.layers.yara.yara_hits.length > 0)
+                html += `<div><span style="color:var(--red)"><i class="fa-solid fa-bug me-2"></i>YARA:</span> Matched: ${report.layers.yara.yara_hits.join(', ')}</div>`;
+            if (report.layers.clamav && report.layers.clamav.status === 'INFECTED')
+                html += `<div><span style="color:var(--red)"><i class="fa-solid fa-virus me-2"></i>ClamAV:</span> Infection detected.</div>`;
+            if (report.layers.ai && report.layers.ai.prediction)
+                html += `<div><span class="text-cyan"><i class="fa-solid fa-robot me-2"></i>AI Prediction:</span> ${report.layers.ai.prediction} (${(report.layers.ai.confidence * 100).toFixed(1)}%)</div>`;
+            if (report.layers.entropy && report.layers.entropy.entropy)
+                html += `<div><span class="text-primary"><i class="fa-solid fa-chart-simple me-2"></i>Entropy:</span> ${report.layers.entropy.entropy.toFixed(4)}</div>`;
+            html += `</div>`;
+        } else {
+            html += `<p style="color: #22d3ee; font-size: 0.85rem;" class="mt-2 fw-bold"><i class="fa-solid fa-lock me-1"></i> Full forensic breakdown is restricted to system administrators.</p>`;
+        }
+
+        html += `</div>`;
+        return html;
+    }
+
+    // === ENCRYPTION REPORT CARD ===
+    function generateEncReportHTML(res) {
+        if (!isAdmin) return '';
+        const now = new Date().toLocaleString();
+        return `
+        <div class="enc-report mt-3">
+            <div class="enc-report-item"><span style="color: #22d3ee; font-weight: bold;">Algorithm</span><span class="fw-bold">AES-256-GCM</span></div>
+            <div class="enc-report-item"><span style="color: #22d3ee; font-weight: bold;">Key Derivation</span><span class="fw-bold">PBKDF2-HMAC-SHA256</span></div>
+            <div class="enc-report-item"><span style="color: #22d3ee; font-weight: bold;">Iterations</span><span class="fw-bold">100,000</span></div>
+            <div class="enc-report-item"><span style="color: #22d3ee; font-weight: bold;">Stego File</span><span class="fw-bold text-info">${res.stego_filename}</span></div>
+            ${res.encrypted_filename ? `<div class="enc-report-item"><span style="color: #22d3ee; font-weight: bold;">Encrypted File</span><span class="fw-bold text-info">${res.encrypted_filename}</span></div>` : ''}
+        </div>`;
+    }
+
+    // === BUTTON STATE HELPERS ===
+    function btnLoading(btn, text) {
+        btn.disabled = true;
+        btn.querySelector('.loader').style.display = 'inline-block';
+        btn.querySelector('span:last-child').innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i>${text}`;
+    }
+    function btnReset(btn, text, icon) {
+        btn.disabled = false;
+        btn.querySelector('.loader').style.display = 'none';
+        btn.querySelector('span:last-child').innerHTML = `<i class="${icon} me-2"></i>${text}`;
+    }
+
+    // === ENCRYPTION HANDLER ===
+    const encryptForm = document.getElementById("encryptForm");
+    if (encryptForm) {
+        encryptForm.onsubmit = async function (e) {
+            e.preventDefault();
+            if (!validatePwd('encryptPassword', 'encryptResult')) return;
+
+            let formData = new FormData(this);
+            let btn = document.getElementById("encryptBtn");
+            let resultDiv = document.getElementById("encryptResult");
+
+            resultDiv.style.display = 'none';
+            btnLoading(btn, 'Processing...');
+
+            try {
+                let r = await fetch("/encrypt", { method: "POST", body: formData });
+                let res = await r.json();
+                resultDiv.style.display = 'block';
+
+                if (!r.ok) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-xmark me-2"></i> ${res.error || "Unknown error"}</div>`;
+                } else {
+                    resultDiv.innerHTML = `
+                    <div class="alert alert-success bg-success text-white border-0"><i class="fa-solid fa-check-circle me-2"></i> Encryption Successful</div>
+                    ${generateEncReportHTML(res)}
+                    ${res.secret_report ? generateReportHTML(res.secret_report) : ''}
+                    <div class="d-flex gap-2 mt-3 flex-wrap">
+                        <a href="/download/${res.stego_filename}" class="btn btn-cyan btn-sm text-dark fw-bold" download><i class="fa-solid fa-download me-1"></i> Download Stego Image</a>
+                        ${res.encrypted_filename ? `<a href="/download/${res.encrypted_filename}" class="btn btn-primary btn-sm text-white fw-bold" download><i class="fa-solid fa-download me-1"></i> Download Raw Encrypted</a>` : ''}
+                    </div>`;
+                }
+            } catch (err) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Network Error: ${err}</div>`;
+            } finally {
+                btnReset(btn, 'Encrypt & Embed', 'fa-solid fa-lock');
+            }
+        };
+    }
+
+    // === DECRYPTION HANDLER ===
+    const decryptForm = document.getElementById("decryptForm");
+    if (decryptForm) {
+        decryptForm.onsubmit = async function (e) {
+            e.preventDefault();
+            if (!validatePwd('decryptPassword', 'decryptResult')) return;
+
+            let formData = new FormData(this);
+            let btn = document.getElementById("decryptBtn");
+            let resultDiv = document.getElementById("decryptResult");
+
+            resultDiv.style.display = 'none';
+            btnLoading(btn, 'Decrypting...');
+
+            try {
+                let r = await fetch("/decrypt", { method: "POST", body: formData });
+                let res = await r.json();
+                resultDiv.style.display = 'block';
+
+                if (!r.ok) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-xmark me-2"></i> ${res.error || "Unknown error"}</div>`;
+                    return;
+                }
+
+                let statusClass = res.safe ? "alert-success bg-success text-white" : "alert-danger bg-danger text-white";
+                let icon = res.safe ? "fa-circle-check" : "fa-triangle-exclamation";
+                let title = res.safe ? "File Safe" : "Security Alert";
+                if (!res.safe && res.extracted_filename) { statusClass = "alert-warning bg-warning text-dark"; title = "Suspicious File"; }
+
+                let html = `
+                <div class="alert ${statusClass} border-0"><i class="fa-solid ${icon} me-2"></i> ${title}: ${res.message}</div>
+                <div class="enc-report mt-3">
+                    <div class="enc-report-item"><span style="color: #22d3ee; font-weight: bold;">Algorithm</span><span class="fw-bold">AES-256-GCM</span></div>
+                    ${res.extracted_filename ? `<div class="enc-report-item"><span style="color: #22d3ee; font-weight: bold;">Extracted File</span><span class="fw-bold text-info">${res.extracted_filename}</span></div>` : ''}
+                </div>`;
+
+                if (res.scan_report) html += generateReportHTML(res.scan_report);
+                if (res.extracted_filename) html += `<div class="mt-3"><a href="/download/${res.extracted_filename}" class="btn btn-cyan btn-sm text-dark fw-bold" download><i class="fa-solid fa-download me-1"></i> Download Extracted File</a></div>`;
+
+                resultDiv.innerHTML = html;
+            } catch (err) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Network Error: ${err}</div>`;
+            } finally {
+                btnReset(btn, 'Decrypt & Scan', 'fa-solid fa-unlock-keyhole');
+            }
+        };
+    }
+
+    // === SCAN HANDLER ===
+    const scanForm = document.getElementById("scanForm");
+    if (scanForm) {
+        scanForm.onsubmit = async function (e) {
+            e.preventDefault();
+
+            let resultDiv = document.getElementById("scanResult");
+            let formData = new FormData(this);
+            let btn = document.getElementById("scanBtn");
+
+            resultDiv.style.display = 'none';
+            btnLoading(btn, 'Analyzing...');
+
+            try {
+                let r = await fetch("/scan", { method: "POST", body: formData });
+                let res = await r.json();
+                resultDiv.style.display = 'block';
+
+                if (!r.ok) {
+                    resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-xmark me-2"></i> ${res.error || "Unknown error"}</div>`;
+                    return;
+                }
+
+                let isSafe = res.risk_level === "Safe";
+                let statusClass = isSafe ? "alert-success bg-success text-white" : "alert-danger bg-danger text-white";
+                let icon = isSafe ? "fa-shield-check" : "fa-skull-crossbones";
+                let title = isSafe ? "Clean Image" : "Threat Detected";
+                if (res.risk_level === "Suspicious") { statusClass = "alert-warning bg-warning text-dark"; title = "Suspicious Image"; icon = "fa-triangle-exclamation"; }
+
+                resultDiv.innerHTML = `<div class="alert ${statusClass} border-0 mb-0"><i class="fa-solid ${icon} me-2"></i> <strong>${title}</strong></div>` + generateReportHTML(res);
+            } catch (err) {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `<div class="alert alert-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Network Error: ${err}</div>`;
+            } finally {
+                btnReset(btn, 'Analyze Image', 'fa-solid fa-magnifying-glass-chart');
+            }
+        };
+    }
+</script>
+{% endblock %}
