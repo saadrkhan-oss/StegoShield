@@ -20,12 +20,12 @@
                     <th>Operation</th>
                     <th>Threat Score</th>
                     <th>Verdict</th>
-                    <th>Action</th>
+                    {% if current_user.is_admin %}<th>Action</th>{% endif %}
                 </tr>
             </thead>
             <tbody id="historyTableBody">
                 <tr>
-                    <td colspan="6" class="text-center py-4">Loading history...</td>
+                <td colspan="6" class="text-center py-4" style="color: #22d3ee;">Loading history...</td>
                 </tr>
             </tbody>
         </table>
@@ -64,7 +64,7 @@
             renderTable(scanData);
         } catch (err) {
             console.error('Error loading history:', err);
-            if(tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Failed to retrieve security logs.</td></tr>';
+            if(tbody) tbody.innerHTML = `<tr><td colspan="${isAdmin ? 6 : 5}" class="text-center py-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Failed to retrieve security logs.</td></tr>`;
         }
     });
 
@@ -73,7 +73,7 @@
         tbody.innerHTML = '';
 
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-cyan">No scan history available.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="${isAdmin ? 6 : 5}" class="text-center py-4" style="color: #22d3ee;">No scan history available.</td></tr>`;
             return;
         }
 
@@ -99,13 +99,11 @@
                 </div>
             </td>
             <td><span class="badge ${badgeClass} rounded-pill px-3">${row.risk_level}</span></td>
-            <td>
-                ${isAdmin ? `
+            ${isAdmin ? `<td>
                 <button class="btn btn-sm btn-cyan text-dark fw-bold view-json-btn" data-id="${row.id}">
                     <i class="fa-solid fa-code"></i> Details
                 </button>
-                ` : `<span class="text-info small"><i class="fa-solid fa-lock"></i> Restricted</span>`}
-            </td>
+            </td>` : ''}
         `;
             tbody.appendChild(tr);
         });

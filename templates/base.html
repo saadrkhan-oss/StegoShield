@@ -54,7 +54,11 @@
         </ul>
         <div class="sidebar-footer">
             <span class="status-dot"></span> System Online<br>
-            <small>Clearance: {{ 'ADMIN' if current_user.is_admin else 'USER' }}</small>
+            {% if current_user.is_admin %}
+            <small><span class="badge bg-danger mt-1"><i class="fa-solid fa-user-shield me-1"></i> ADMIN ACCESS</span></small>
+            {% else %}
+            <small><span class="badge bg-secondary mt-1"><i class="fa-solid fa-user me-1"></i> STANDARD USER</span></small>
+            {% endif %}
         </div>
     </nav>
 
