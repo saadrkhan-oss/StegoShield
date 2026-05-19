@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title"><i class="fa-solid fa-users-gear me-2 text-cyan"></i> User Management</h2>
+    <button class="btn btn-cyan text-dark fw-bold" onclick="openAddModal()">
+        <i class="fa-solid fa-user-plus me-1"></i> Add User
+    </button>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary-glow"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-details">
+                <p class="stat-label">Total Users</p>
+                <p class="stat-value" id="totalUsers">-</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon bg-danger-glow"><i class="fa-solid fa-user-shield"></i></div>
+            <div class="stat-details">
+                <p class="stat-label">Admins</p>
+                <p class="stat-value" id="totalAdmins">-</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon bg-success-glow"><i class="fa-solid fa-user"></i></div>
+            <div class="stat-details">
+                <p class="stat-label">Standard Users</p>
+                <p class="stat-value" id="totalStandard">-</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="dashboard-card">
+    <div class="table-responsive">
+        <table class="table cyber-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Scans</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+                <tr>
+                    <td colspan="5" class="text-center py-4" style="color: #22d3ee;">Loading users...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border-secondary text-light">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="fa-solid fa-user-plus me-2 text-cyan"></i> Add New User</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="addUserAlert"></div>
+                <div class="mb-3">
+                    <label class="form-label text-light fw-bold small">Username</label>
+                    <input type="text" id="newUsername" class="form-control bg-dark border-secondary text-light" 
+                           placeholder="Enter username" autocomplete="off">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-light fw-bold small">Password</label>
+                    <input type="password" id="newPassword" class="form-control bg-dark border-secondary text-light" 
+                           placeholder="Minimum 8 characters">
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="newIsAdmin">
+                    <label class="form-check-label text-light" for="newIsAdmin">Grant Admin Access</label>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-cyan text-dark fw-bold" onclick="addUser()">
+                    <i class="fa-solid fa-user-plus me-1"></i> Create User
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border-danger text-light">
+            <div class="modal-header border-danger">
+                <h5 class="modal-title"><i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i> Confirm Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete user <strong id="deleteUserName" class="text-danger"></strong>?</p>
+                <p class="small" style="color: #cbd5e1;">This action cannot be undone. All scan records associated with this user will become orphaned.</p>
+            </div>
+            <div class="modal-footer border-danger">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger fw-bold" id="confirmDeleteBtn">
+                    <i class="fa-solid fa-trash me-1"></i> Delete User
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let usersData = [];
+
+    document.addEventListener('DOMContentLoaded', loadUsers);
+
+    async function loadUsers() {
+        const tbody = document.getElementById('usersTableBody');
+        try {
+            const res = await fetch('/api/users');
+            if (!res.ok) throw new Error('Unauthorized');
+            usersData = await res.json();
+            renderUsers(usersData);
+            updateStats(usersData);
+        } catch (err) {
+            console.error(err);
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i> Failed to load users.</td></tr>';
+        }
+    }
+
+    function updateStats(users) {
+        document.getElementById('totalUsers').textContent = users.length;
+        document.getElementById('totalAdmins').textContent = users.filter(u => u.is_admin).length;
+        document.getElementById('totalStandard').textContent = users.filter(u => !u.is_admin).length;
+    }
+
+    function renderUsers(users) {
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+
+        if (users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4" style="color: #22d3ee;">No users found.</td></tr>';
+            return;
+        }
+
+        users.forEach(user => {
+            const roleBadge = user.is_admin
+                ? '<span class="badge bg-danger rounded-pill px-3"><i class="fa-solid fa-user-shield me-1"></i> Admin</span>'
+                : '<span class="badge bg-secondary rounded-pill px-3"><i class="fa-solid fa-user me-1"></i> User</span>';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="color: #22d3ee; font-weight: bold;">#${user.id}</td>
+                <td class="text-light fw-bold"><i class="fa-solid fa-circle-user me-2 text-cyan"></i>${user.username}</td>
+                <td>${roleBadge}</td>
+                <td class="text-light">${user.scan_count} scans</td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm ${user.is_admin ? 'btn-outline-warning' : 'btn-outline-success'}" 
+                                onclick="toggleAdmin(${user.id}, '${user.username}')" title="${user.is_admin ? 'Demote to User' : 'Promote to Admin'}">
+                            <i class="fa-solid ${user.is_admin ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${user.id}, '${user.username}')" title="Delete User">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // === ADD USER ===
+    function openAddModal() {
+        document.getElementById('newUsername').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('newIsAdmin').checked = false;
+        document.getElementById('addUserAlert').innerHTML = '';
+        new bootstrap.Modal(document.getElementById('addUserModal')).show();
+    }
+
+    async function addUser() {
+        const username = document.getElementById('newUsername').value.trim();
+        const password = document.getElementById('newPassword').value.trim();
+        const is_admin = document.getElementById('newIsAdmin').checked;
+        const alertDiv = document.getElementById('addUserAlert');
+
+        if (!username || !password) {
+            alertDiv.innerHTML = '<div class="alert alert-danger py-2"><i class="fa-solid fa-xmark me-1"></i> Fill in all fields.</div>';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, is_admin })
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                alertDiv.innerHTML = `<div class="alert alert-danger py-2"><i class="fa-solid fa-xmark me-1"></i> ${data.error}</div>`;
+                return;
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+            loadUsers();
+        } catch (err) {
+            alertDiv.innerHTML = '<div class="alert alert-danger py-2">Network error.</div>';
+        }
+    }
+
+    // === TOGGLE ADMIN ===
+    async function toggleAdmin(userId, username) {
+        try {
+            const res = await fetch(`/api/users/${userId}/toggle-admin`, { method: 'PUT' });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error);
+                return;
+            }
+            loadUsers();
+        } catch (err) {
+            alert('Failed to update user role.');
+        }
+    }
+
+    // === DELETE USER ===
+    let deleteTargetId = null;
+
+    function confirmDelete(userId, username) {
+        deleteTargetId = userId;
+        document.getElementById('deleteUserName').textContent = username;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+        if (!deleteTargetId) return;
+
+        try {
+            const res = await fetch(`/api/users/${deleteTargetId}`, { method: 'DELETE' });
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.error);
+                return;
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+            loadUsers();
+        } catch (err) {
+            alert('Failed to delete user.');
+        }
+    });
+</script>
+{% endblock %}

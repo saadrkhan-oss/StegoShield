@@ -8,6 +8,7 @@ from routes.decrypt_routes import decrypt_bp
 from routes.scan_routes import scan_bp
 from routes.main_routes import main_bp
 from routes.auth_routes import auth_bp
+from routes.admin_routes import admin_bp
 from models import db, User
 
 def create_app():
@@ -33,6 +34,7 @@ def create_app():
     app.register_blueprint(scan_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
 
     with app.app_context():
         db.create_all()

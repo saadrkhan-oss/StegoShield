@@ -46,6 +46,13 @@
                     <i class="fa-solid fa-clock-rotate-left"></i> Scan History
                 </a>
             </li>
+            {% if current_user.is_admin %}
+            <li>
+                <a href="/admin/users" class="nav-link {% if request.path == '/admin/users' %}active{% endif %}">
+                    <i class="fa-solid fa-users-gear"></i> User Management
+                </a>
+            </li>
+            {% endif %}
             <li class="mt-auto">
                 <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger">
                     <i class="fa-solid fa-right-from-bracket"></i> Logout
