@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StegoShield — Forensic Steganography Detection Platform</title>
+    <meta name="description" content="Advanced cybersecurity platform for detecting hidden threats in images using AI-powered forensic analysis and military-grade encryption.">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0b1120;
+            --text-main: #f8fafc;
+            --cyan: #22d3ee;
+            --primary: #3b82f6;
+            --green: #10b981;
+            --red: #ef4444;
+            --orange: #f97316;
+            --border-color: rgba(255,255,255,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* === NAVBAR === */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            background: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-logo i {
+            font-size: 1.8rem;
+            color: var(--cyan);
+            text-shadow: 0 0 15px rgba(34, 211, 238, 0.5);
+        }
+
+        .nav-logo span {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--cyan); }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-ghost {
+            padding: 10px 24px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.15);
+        }
+
+        .btn-solid {
+            padding: 10px 24px;
+            border: none;
+            background: var(--cyan);
+            color: #0f172a;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+        }
+
+        .btn-solid:hover {
+            background: #06b6d4;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(34, 211, 238, 0.4);
+        }
+
+        /* === HERO SECTION === */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 20px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(34, 211, 238, 0.06) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+            animation: floatBg 15s ease-in-out infinite;
+        }
+
+        @keyframes floatBg {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-20px, 15px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(34, 211, 238, 0.1);
+            border: 1px solid rgba(34, 211, 238, 0.25);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--cyan);
+            font-weight: 600;
+            margin-bottom: 28px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero h1 {
+            font-size: 3.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease 0.1s both;
+        }
+
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, var(--cyan), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            line-height: 1.7;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            animation: fadeInUp 0.8s ease 0.3s both;
+        }
+
+        .hero-buttons .btn-solid {
+            padding: 14px 36px;
+            font-size: 1rem;
+        }
+
+        .hero-buttons .btn-ghost {
+            padding: 14px 36px;
+            font-size: 1rem;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === FEATURES SECTION === */
+        .section {
+            padding: 100px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            text-align: center;
+            color: var(--cyan);
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 60px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--primary));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(34, 211, 238, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card:hover::before { opacity: 1; }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: #94a3b8;
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        /* === PIPELINE SECTION === */
+        .pipeline-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        .pipeline-step {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px 16px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .pipeline-step:hover {
+            border-color: var(--cyan);
+            transform: translateY(-4px);
+        }
+
+        .pipeline-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(34, 211, 238, 0.15);
+            color: var(--cyan);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            margin: 0 auto 12px;
+        }
+
+        .pipeline-step i {
+            font-size: 1.5rem;
+            color: var(--cyan);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .pipeline-step h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .pipeline-step p {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        /* === STATS SECTION === */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+        }
+
+        .stat-box .stat-num {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-box .stat-text {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        /* === CTA SECTION === */
+        .cta-section {
+            text-align: center;
+            padding: 100px 40px;
+            position: relative;
+        }
+
+        .cta-card {
+            max-width: 700px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(59, 130, 246, 0.08));
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            border-radius: 24px;
+            padding: 60px 40px;
+        }
+
+        .cta-card h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .cta-card p {
+            color: #94a3b8;
+            font-size: 1.05rem;
+            margin-bottom: 32px;
+        }
+
+        /* === FOOTER === */
+        .footer {
+            border-top: 1px solid var(--border-color);
+            padding: 40px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 992px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .pipeline-grid { grid-template-columns: repeat(3, 1fr); }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .hero h1 { font-size: 2.6rem; }
+            .nav-links { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .features-grid { grid-template-columns: 1fr; }
+            .pipeline-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-row { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2rem; }
+            .navbar { padding: 12px 20px; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="/" class="nav-logo">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>StegoShield</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pipeline">Forensic Engine</a></li>
+            <li><a href="#overview">Overview</a></li>
+        </ul>
+        <div class="nav-buttons">
+            <a href="/login" class="btn-ghost">Log In</a>
+            <a href="/register" class="btn-solid">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fa-solid fa-lock"></i>
+                AES-256-GCM Encrypted &bull; AI-Powered Analysis
+            </div>
+            <h1>Detect Hidden Threats <br>with <span class="gradient-text">Forensic Precision</span></h1>
+            <p>StegoShield is an advanced cybersecurity platform that uses a 10-layer forensic engine to detect steganographic payloads, malware signatures, and statistical anomalies hidden within digital images.</p>
+            <div class="hero-buttons">
+                <a href="/register" class="btn-solid">
+                    <i class="fa-solid fa-rocket me-2"></i> Launch Platform
+                </a>
+                <a href="#features" class="btn-ghost">
+                    <i class="fa-solid fa-eye me-2"></i> Explore Features
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section" id="features">
+        <div class="section-label">Core Capabilities</div>
+        <h2 class="section-title">Enterprise-Grade Security Tools</h2>
+        <p class="section-subtitle">Three integrated modules working together to secure, analyze, and monitor image-based data threats.</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--green);">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3>Steganographic Encryption</h3>
+                <p>Embed secret files inside carrier images using LSB steganography with AES-256-GCM authenticated encryption and PBKDF2 key derivation (100,000 iterations).</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--red);">
+                    <i class="fa-solid fa-microscope"></i>
+                </div>
+                <h3>Forensic Threat Scanner</h3>
+                <p>Analyze any image through a 10-layer pipeline including YARA signatures, ClamAV, AI prediction, entropy mapping, and statistical steganalysis.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--primary);">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <h3>Intelligence Dashboard</h3>
+                <p>SOC-grade real-time monitoring with threat distribution charts, scan history, risk classification, and full forensic report access for administrators.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(249, 115, 22, 0.1); color: var(--orange);">
+                    <i class="fa-solid fa-unlock-keyhole"></i>
+                </div>
+                <h3>Secure Extraction</h3>
+                <p>Decrypt and extract hidden payloads from stego images with automatic threat scanning of extracted content before delivery.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(34, 211, 238, 0.1); color: var(--cyan);">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h3>Role-Based Access</h3>
+                <p>Granular RBAC system separating Admin and Standard User privileges. Full forensic breakdown restricted to authorized security analysts.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <h3>AI Risk Scoring</h3>
+                <p>Machine learning model trained on steganographic datasets predicts threat probability and assigns a 0-100 risk score with confidence metrics.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 10-LAYER PIPELINE -->
+    <section class="section" id="pipeline">
+        <div class="section-label">Defense in Depth</div>
+        <h2 class="section-title">10-Layer Forensic Pipeline</h2>
+        <p class="section-subtitle">Every uploaded image passes through a multi-stage analysis engine before a final threat verdict is issued.</p>
+
+        <div class="pipeline-grid">
+            <div class="pipeline-step">
+                <div class="pipeline-num">1</div>
+                <i class="fa-solid fa-file-circle-check"></i>
+                <h4>Validation</h4>
+                <p>File integrity & header check</p>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-num">2</div>
+                <i class="fa-solid fa-tags"></i>
+                <h4>Metadata</h4>
+                <p>EXIF data analysis</p>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-num">3</div>
+                <i class="fa-solid fa-chart-area"></i>
+                <h4>Steganalysis</h4>
+                <p>Histogram anomaly detection</p>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-num">4</div>
+                <i class="fa-solid fa-layer-group"></i>
+                <h4>LSB Analysis</h4>
+                <p>Bit-plane inconsistency</p>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-num">5</div>
+                <i class="fa-solid fa-wave-square"></i>
+                <h4>Entropy</h4>
+                <p>Randomness mapping</p>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-num">6</div>
+                <i class="fa-solid fa-bug"></i>
+                <h4>YARA</h4>
+                <p>Signature matching</p>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-num">7</div>
+                <i class="fa-solid fa-virus"></i>
+                <h4>ClamAV</h4>
+                <p>Malware scanning</p>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-num">8</div>
+                <i class="fa-solid fa-robot"></i>
+                <h4>AI Engine</h4>
+                <p>ML threat prediction</p>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-num">9</div>
+                <i class="fa-solid fa-box-open"></i>
+                <h4>Extraction</h4>
+                <p>Payload carving</p>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-num">10</div>
+                <i class="fa-solid fa-scale-balanced"></i>
+                <h4>Classification</h4>
+                <p>Final risk verdict (0-100)</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SYSTEM OVERVIEW -->
+    <section class="section" id="overview">
+        <div class="section-label">System Overview</div>
+        <h2 class="section-title">Built for Security Professionals</h2>
+        <p class="section-subtitle">A research-grade platform engineered with industry-standard tools and protocols.</p>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-num">10</div>
+                <div class="stat-text">Forensic Analysis Layers</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">256</div>
+                <div class="stat-text">Bit Encryption Key</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">100K</div>
+                <div class="stat-text">PBKDF2 Iterations</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-num">0-100</div>
+                <div class="stat-text">AI Threat Score Range</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="cta-card">
+            <h2><i class="fa-solid fa-shield-halved me-2" style="color: var(--cyan);"></i> Ready to Secure Your Data?</h2>
+            <p>Create your account and start analyzing images for hidden threats in seconds.</p>
+            <div class="hero-buttons">
+                <a href="/register" class="btn-solid">
+                    <i class="fa-solid fa-user-plus me-2"></i> Create Account
+                </a>
+                <a href="/login" class="btn-ghost">
+                    <i class="fa-solid fa-right-to-bracket me-2"></i> Sign In
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>&copy; 2024 <a href="/">StegoShield</a> — Forensic Steganography Detection Platform</p>
+        <p style="margin-top: 8px;">Developed as a Final Year Research Project &bull; Cybersecurity Division</p>
+    </footer>
+
+    <!-- Smooth Scroll -->
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
