@@ -31,7 +31,7 @@
         <ul class="nav-links">
             {% if current_user.is_admin %}
             <li>
-                <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
                     <i class="fa-solid fa-chart-line"></i> Dashboard
                 </a>
             </li>
