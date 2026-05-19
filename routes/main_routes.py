@@ -7,12 +7,21 @@ from flask_login import login_required, current_user
 
 main_bp = Blueprint("main", __name__)
 
-@main_bp.route("/")
+@main_bp.route("/dashboard")
 @login_required
 def dashboard():
     if not current_user.is_admin:
         return redirect(url_for('main.upload'))
     return render_template("dashboard.html")
+
+@main_bp.route("/")
+def home():
+    if current_user.is_authenticated:
+        if current_user.is_admin:
+            return redirect(url_for('main.dashboard'))
+        else:
+            return redirect(url_for('main.upload'))
+    return render_template("home.html")
 
 @main_bp.route("/upload")
 @login_required
