@@ -501,7 +501,8 @@ h1, h2, h3, h4, h5 {
 
 /* Responsive Media Queries */
 @media (max-width: 992px) {
-    .sidebar { transform: translateX(-100%); transition: 0.3s; }
+    .sidebar { transform: translateX(-100%); transition: 0.3s; z-index: 1050; }
+    .sidebar.show { transform: translateX(0); box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
     .main-content { margin-left: 0; }
     .enc-report { grid-template-columns: 1fr; }
 }

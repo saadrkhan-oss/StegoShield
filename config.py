@@ -24,7 +24,11 @@ class Config:
     ADMIN_KEY = os.environ.get('ADMIN_KEY', 'STEGO_ADMIN_2024')
 
     # Database Configuration (supports SQLite locally, PostgreSQL in production)
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(BASE_DIR, 'stego.db'))
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url and db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+        
+    SQLALCHEMY_DATABASE_URI = db_url or ('sqlite:///' + os.path.join(BASE_DIR, 'stego.db'))
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Ensure upload directories exist
