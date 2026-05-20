@@ -10,7 +10,7 @@ Werkzeug>=3.0.0
 
 # Database
 SQLAlchemy>=2.0.0
-psycopg2-binary>=2.9.9
+psycopg2>=2.9.9
 
 # Cryptography & Steganography
 cryptography>=41.0.0
@@ -29,7 +29,7 @@ python-magic-bin>=0.4.14; sys_platform == "win32"
 python-magic>=0.4.27; sys_platform != "win32"
 
 # AI / Machine Learning
-tensorflow>=2.15.0; python_version < "3.13"
+tensorflow-cpu>=2.15.0; python_version < "3.13"
 
 # Production Server
 gunicorn>=21.2.0
