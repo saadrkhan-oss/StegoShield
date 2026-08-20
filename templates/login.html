@@ -49,9 +49,9 @@
         <form method="POST" action="{{ url_for('auth.login') }}">
             <div class="mb-3">
                 <label for="username" class="form-label text-light small uppercase fw-bold" style="letter-spacing: 1px;">
-                    <i class="fa-solid fa-user-tag text-cyan me-1"></i> Operator Username
+                    <i class="fa-solid fa-envelope text-cyan me-1"></i> Operator Email
                 </label>
-                <input type="text" id="username" name="username" class="form-control bg-dark border-secondary text-light p-2" placeholder="Enter your operator ID" required>
+                <input type="email" id="username" name="username" class="form-control bg-dark border-secondary text-light p-2" placeholder="operator@domain.com" required>
             </div>
             <div class="mb-4">
                 <label for="password" class="form-label text-light small uppercase fw-bold" style="letter-spacing: 1px;">
