@@ -49,6 +49,7 @@ def login():
         user = User.query.filter(db.func.lower(User.username) == username.lower()).first()
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
+            flash('Login successfully', 'success')
             if user.is_admin:
                 return redirect(url_for('main.dashboard'))
             else:
